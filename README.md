@@ -33,6 +33,9 @@ Inspired by <https://theyfightcrime.org>.
 cargo build --release
 ```
 
+Alternatively, a very small (< 3 MB) Docker image can be built using the
+included Dockerfile.
+
 ## Run
 
 ```shell
