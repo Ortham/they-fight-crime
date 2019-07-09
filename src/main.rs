@@ -1,12 +1,11 @@
 // Inspired by <https://www.theyfightcrime.org>
 use actix_web::{web, App, HttpServer};
-use clap::Arg;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
+use structopt::StructOpt;
 
 use std::io::{Error, Result};
-use std::path::Path;
-use std::str::FromStr;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone, Deserialize)]
 struct TheyFightCrime {
@@ -47,38 +46,19 @@ fn they_fight_crime(data: web::Data<TheyFightCrime>) -> String {
     data.generate()
 }
 
+#[derive(Debug, StructOpt)]
+#[structopt(rename_all = "kebab-case")]
+struct Options {
+    #[structopt(long, short, default_value = "8080")]
+    port: u16,
+    #[structopt(long, short, default_value = "./data.json", parse(from_os_str))]
+    data_path: PathBuf
+}
+
 fn main() -> Result<()> {
-    let matches = clap::App::new(clap::crate_name!())
-        .version(clap::crate_version!())
-        .author(clap::crate_authors!())
-        .about(clap::crate_description!())
-        .arg(
-            Arg::with_name("port")
-                .short("p")
-                .long("port")
-                .takes_value(true)
-                .default_value("8080"),
-        )
-        .arg(
-            Arg::with_name("data_path")
-                .short("d")
-                .long("data-path")
-                .takes_value(true)
-                .default_value("./data.json"),
-        )
-        .get_matches();
+    let options = Options::from_args();
 
-    let port = matches
-        .value_of("port")
-        .map(u16::from_str)
-        .expect("a value for port")
-        .expect("a valid port number");
-    let data_path = matches
-        .value_of("data_path")
-        .map(Path::new)
-        .expect("a value for data_path");
-
-    let tfc_data = TheyFightCrime::load(data_path)?;
+    let tfc_data = TheyFightCrime::load(&options.data_path)?;
     let web_data = web::Data::new(tfc_data);
 
     let server = HttpServer::new(move || {
@@ -86,8 +66,8 @@ fn main() -> Result<()> {
             .register_data(web_data.clone())
             .route("/", web::get().to(they_fight_crime))
     })
-    .bind(format!("0.0.0.0:{}", port))?;
+    .bind(format!("0.0.0.0:{}", options.port))?;
 
-    println!("Listening on port {}", port);
+    println!("Listening on port {}", options.port);
     server.run()
 }
