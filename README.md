@@ -39,5 +39,8 @@ cargo build --release
 cargo run --release
 ```
 
-Or just run the `they-fight-crime` executable in `target/release` directly (make
-sure `data.json` is in the current working directory).
+Or just run the `they-fight-crime` executable in `target/release` directly.
+
+The default port is `8080`, and the default JSON file path is `./data.json`.
+These can be set with CLI parameters, run with the `--help` parameter to find
+out more.

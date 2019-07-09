@@ -1,9 +1,11 @@
 // Inspired by <https://www.theyfightcrime.org>
 use actix_web::{web, App, HttpServer};
+use clap::Arg;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
 
 use std::path::Path;
+use std::str::FromStr;
 
 #[derive(Clone, Deserialize)]
 struct TheyFightCrime {
@@ -45,9 +47,37 @@ fn they_fight_crime(data: web::Data<TheyFightCrime>) -> String {
 }
 
 fn main() -> Result<(), std::io::Error> {
-    let port = 3000;
+    let matches = clap::App::new(clap::crate_name!())
+        .version(clap::crate_version!())
+        .author(clap::crate_authors!())
+        .about(clap::crate_description!())
+        .arg(
+            Arg::with_name("port")
+                .short("p")
+                .long("port")
+                .takes_value(true)
+                .default_value("8080"),
+        )
+        .arg(
+            Arg::with_name("data_path")
+                .short("d")
+                .long("data-path")
+                .takes_value(true)
+                .default_value("./data.json"),
+        )
+        .get_matches();
 
-    let tfc_data = TheyFightCrime::load(Path::new("./data.json"))?;
+    let port = matches
+        .value_of("port")
+        .map(u16::from_str)
+        .expect("a value for port")
+        .expect("a valid port number");
+    let data_path = matches
+        .value_of("data_path")
+        .map(Path::new)
+        .expect("a value for data_path");
+
+    let tfc_data = TheyFightCrime::load(data_path)?;
     let web_data = web::Data::new(tfc_data);
 
     let server = HttpServer::new(move || {

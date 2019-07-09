@@ -1,11 +1,13 @@
 [package]
 name = "they-fight-crime"
+description = "Quite possibly the fastest buddy cop show tagline generation server in the world!"
 version = "0.1.0"
 authors = ["Oliver Hamlet <oliver.hamlet@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 actix-web = "1.0"
+clap = "2.0"
 rand = "0.7"
 serde = "1.0"
 serde_json = "1.0"
