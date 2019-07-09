@@ -4,6 +4,7 @@ use clap::Arg;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
 
+use std::io::{Error, Result};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -15,9 +16,9 @@ struct TheyFightCrime {
 }
 
 impl TheyFightCrime {
-    fn load(path: &std::path::Path) -> std::io::Result<Self> {
+    fn load(path: &Path) -> Result<Self> {
         let file = std::fs::File::open(path)?;
-        Ok(serde_json::from_reader(file)?)
+        serde_json::from_reader(file).map_err(Error::from)
     }
 
     fn generate(&self) -> String {
@@ -46,7 +47,7 @@ fn they_fight_crime(data: web::Data<TheyFightCrime>) -> String {
     data.generate()
 }
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<()> {
     let matches = clap::App::new(clap::crate_name!())
         .version(clap::crate_version!())
         .author(clap::crate_authors!())
