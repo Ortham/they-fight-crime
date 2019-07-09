@@ -21,6 +21,8 @@ RUN touch src/main.rs \
 
 FROM scratch
 
+WORKDIR /opt
+
 COPY --from=build /opt/tfc/target/x86_64-unknown-linux-musl/release/they-fight-crime /opt/
 ADD data.json /opt/
 
