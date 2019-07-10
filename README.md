@@ -33,6 +33,9 @@ Inspired by <https://theyfightcrime.org>.
 cargo build --release
 ```
 
+Export `RUSTFLAGS="-C target-cpu=native"` first to increase speed at the cost of
+portability.
+
 Alternatively, a very small (< 3 MB) Docker image can be built using the
 included Dockerfile.
 
