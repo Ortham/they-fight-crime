@@ -50,3 +50,34 @@ Or just run the `they-fight-crime` executable in `target/release` directly.
 The default port is `8080`, and the default JSON file path is `./data.json`.
 These can be set with CLI parameters, run with the `--help` parameter to find
 out more.
+
+## Performance
+
+Benchmarking was performed using [vegeta](https://github.com/tsenart/vegeta) on
+a headless Debian Stretch machine with an Intel Core i7-6700K and 8 GB of RAM.
+
+At idle, CPU usage was 0% and RAM usage was 3.4 MB.
+
+```
+$ ulimit -n 40000 # An arbitrarily large number.
+$ /usr/bin/time -v target/release/they-fight-crime &
+$ echo "GET http://127.0.0.1:8080/" | vegeta attack -duration 10s -rate 50000/1s | tee tfc.50k.10s.bin | vegeta report
+Requests      [total, rate]            499998, 50000.08
+Duration      [total, attack, wait]    9.999995309s, 9.999943092s, 52.217µs
+Latencies     [mean, 50, 95, 99, max]  71.236µs, 56.44µs, 112.075µs, 393.861µs, 47.324202ms
+Bytes In      [total, mean]            72431277, 144.86
+Bytes Out     [total, mean]            0, 0.00
+Success       [ratio]                  100.00%
+Status Codes  [code:count]             200:499998
+Error Set:
+```
+
+Under load, max CPU usage was 90% and max RAM usage was 8.7 MB.
+
+CPU usage was as seen in top with a 1s refresh interval, so may be inaccurate.
+The load test was run several times, restarting they-fight-crime each time, and
+the results were roughly the same each time (however, the 95%, 99% and max
+latencies varied between 1/3 and 3x the values above).
+
+At higher rates, vegeta started to use > 750% CPU, starving they-fight-crime of
+the CPU it needed, and causing requests to fail.
